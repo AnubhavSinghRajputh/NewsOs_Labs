@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: const PremiumAppBar(title: 'NEWSOS'),
+      appBar: const PremiumAppBar(title: 'QUANTNEWS'),
       body: Stack(
         children: [
           // 1. Constant Premium Background Animation (Fluid Mesh/Aurora Painter)
