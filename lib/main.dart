@@ -1,33 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'screens/splash_screen.dart';
-void main() {
-  runApp(const ComingSoonApp());
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://dmgwkgadhnpjnnjklnqh.supabase.co',
+    publishableKey: 'sb_publishable_Lspy0F1ek5gInIYOkY087A_IGPG3Xkg',
+  );
+
+  runApp(const QuantNewsApp());
 }
-class ComingSoonApp extends StatelessWidget {
-  const ComingSoonApp({Key? key}) : super(key: key);
+
+class QuantNewsApp extends StatelessWidget {
+  const QuantNewsApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Coming Soon',
+      title: 'QuantNews',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0A0C),
-        primaryColor: Colors.white,
-        fontFamily: 'Inter',
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-          bodyLarge: TextStyle(
-            color: Color(0xFF9E9E9E),
-            fontSize: 16,
-          ),
-        ),
+        scaffoldBackgroundColor: const Color(0xFF070709),
+        useMaterial3: true,
       ),
       home: const SplashScreen(),
     );
   }
 }
+
+/// Global Supabase client shortcut for QuantNews screens.
+SupabaseClient get supabase => Supabase.instance.client;

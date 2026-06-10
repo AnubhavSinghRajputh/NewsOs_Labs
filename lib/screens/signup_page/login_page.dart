@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../services/auth_service.dart';
 import '../app_bar.dart';
+import '../home_screen.dart';
 import '../premium_effects.dart';
 import 'signup_page.dart';
 
@@ -14,6 +17,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   late AnimationController _bgController;
   late AnimationController _textController;
+  late final AuthService _authService;
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -23,6 +27,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _authService = AuthService(Supabase.instance.client);
 
     _bgController = AnimationController(
       vsync: this,
@@ -65,31 +70,56 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please enter both email and password.',
-            style: TextStyle(color: Colors.white.withOpacity(0.9)),
-          ),
-          backgroundColor: const Color(0xFF1A1A1F),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
+      _showSnackBar('Please enter both email and password.');
       return;
     }
 
     setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
 
+    try {
+      await _authService.signIn(email: email, password: password);
+      if (!mounted) return;
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+            (_) => false,
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showSnackBar(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      _showSnackBar('Sign in failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showSnackBar('Enter your email address first.');
+      return;
+    }
+
+    try {
+      await _authService.resetPassword(email);
+      if (!mounted) return;
+      _showSnackBar('Password reset email sent.');
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showSnackBar(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      _showSnackBar('Could not send reset email. Try again.');
+    }
+  }
+
+  void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Signed in successfully. Connect your auth API here.',
+          message,
           style: TextStyle(color: Colors.white.withOpacity(0.9)),
         ),
         backgroundColor: const Color(0xFF1A1A1F),
@@ -200,8 +230,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   const SizedBox(height: 28),
                   AuraHeadline(
                     controller: _textController,
-                    fullText: '< sign in > to QuantNews',
-                    highlightPart: '< sign in >',
+                    fullText: 'sign in to quantnews',
+                    highlightPart: 'sign in',
                   ),
                   const SizedBox(height: 16),
                   FadeInOnTextAnimation(
@@ -291,7 +321,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: _forgotPassword,
                       child: Text(
                         'Forgot password?',
                         style: TextStyle(

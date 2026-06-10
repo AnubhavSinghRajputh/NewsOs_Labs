@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../services/auth_service.dart';
 import '../app_bar.dart';
 import '../premium_effects.dart';
 import 'login_page.dart';
@@ -14,6 +16,7 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   late AnimationController _bgController;
   late AnimationController _textController;
+  late final AuthService _authService;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -26,6 +29,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _authService = AuthService(Supabase.instance.client);
 
     _bgController = AnimationController(
       vsync: this,
@@ -81,12 +85,35 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
       return;
     }
 
-    setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
+    if (password.length < 6) {
+      _showSnackBar('Password must be at least 6 characters.');
+      return;
+    }
 
-    _showSnackBar('Account created successfully. Connect your auth API here.');
+    setState(() => _isSubmitting = true);
+
+    try {
+      await _authService.signUp(
+        email: email,
+        password: password,
+        fullName: name,
+      );
+      if (!mounted) return;
+
+      _showSnackBar('Account created! You can sign in now.');
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(builder: (_) => const LoginPage()),
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showSnackBar(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      _showSnackBar('Sign up failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   void _showSnackBar(String message) {
@@ -204,8 +231,8 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                   const SizedBox(height: 28),
                   AuraHeadline(
                     controller: _textController,
-                    fullText: '< create > your account',
-                    highlightPart: '< create >',
+                    fullText: 'create your account',
+                    highlightPart: 'create',
                   ),
                   const SizedBox(height: 16),
                   FadeInOnTextAnimation(
