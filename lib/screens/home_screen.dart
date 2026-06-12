@@ -268,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             'continue with github',
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: 17,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.0,
                             ),
@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const Text(
                             'continue with google',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 18,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1.0,
                             ),
@@ -325,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       children: [
         Text(
           text,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1.0),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 1.0),
         ),
         const SizedBox(width: 8),
         Icon(icon, size: 18),

@@ -30,12 +30,12 @@ class _CongratsPageState extends State<CongratsPage> with TickerProviderStateMix
 
     _bgController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 30),
     )..repeat();
 
     _textController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 3000),
     );
 
     // START THE GUARD CHECK
@@ -131,7 +131,7 @@ class _CongratsPageState extends State<CongratsPage> with TickerProviderStateMix
                     Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                   },
                   child: const Text(
-                    "Continue to Dashboard",
+                    "Continue to Home",
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
