@@ -21,7 +21,7 @@ class _CongratsPageState extends State<CongratsPage> with TickerProviderStateMix
   late AnimationController _bgController;
   late AnimationController _textController;
 
-  // NEW: Guard variable to track authentication status
+  // NEW: GUARD VARIABLE AUTH STATUS TO TRACK DOWN KAREGA
   bool _isVerified = false;
 
   @override
@@ -38,24 +38,24 @@ class _CongratsPageState extends State<CongratsPage> with TickerProviderStateMix
       duration: const Duration(milliseconds: 3000),
     );
 
-    // START THE GUARD CHECK
+    // YE VARIABLE STATE GUARD KA ENTRY POINT HAI
     _verifySession();
   }
 
   /// This method ensures the user is actually logged in before showing the UI
   Future<void> _verifySession() async {
-    // 1. Check if a Supabase session exists
+    // 1. CHECK KARO KI SUPABSE KA SESSION SACH ME EXIA=ST KARTA HAI YA NAHI ????????
     final session = Supabase.instance.client.auth.currentSession;
 
     if (session == null) {
-      // 2. If NO session is found, the user is not logged in.
-      // Redirect them back to the login page immediately.
+      // 2. AGAR SESSION NAHI MILA TOH USER LOGIN HE NAHI HAI BC
+      // SALO KO FATFAT SE LOGIN PAGE PE BHEJO
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/login');
-        // Note: Ensure you have '/login' defined in your main.dart routes
+        // ENSURE KARO KI MAIN.DART ME LOGIN KE ROUTES DEFINED HAIN BECAUSE USKE BINA LOGIN SESSION INITALISE KAHA SE HOGGA
       }
     } else {
-      // 3. Session exists! Now we can safely trigger the animations and show the page.
+      // 3. SESSION EXXIST KARTA HAI TOH ANIMATIONS KO TRIGGER KAOR AND AAGE PROCEED KARO
       setState(() {
         _isVerified = true;
       });
@@ -100,7 +100,7 @@ class _CongratsPageState extends State<CongratsPage> with TickerProviderStateMix
       );
     }
 
-    // ONLY RENDERED IF _isVerified == true
+    // tabhi verify hoga jab ki  _isVerified == true
     return Scaffold(
       body: PremiumBackgroundStack(
         bgController: _bgController,

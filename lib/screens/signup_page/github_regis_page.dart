@@ -15,7 +15,7 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
   late AnimationController _bgController;
   late AnimationController _textController;
 
-  // ADDED: Loading state to prevent premature triggers and multiple clicks
+  // YE  Loading state make usre karti hai ki premature opening and immature clicks ke karan usri screens render na hon
   bool _isSubmitting = false;
 
   @override
@@ -46,20 +46,20 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
     super.dispose();
   }
 
-  // Trigger the GitHub Auth Service
+  // guthub authentication service ko trigger karna
   Future<void> _handleGitHubAuth() async {
     // 1. Immediately lock the UI to prevent double-clicks or premature logic
     setState(() => _isSubmitting = true);
 
     try {
-      // 2. Await the actual authentication process
+      // 2. Await karna hai actual authentication proccess ka
       await GitHubAuthService().signInWithGitHub();
 
-      // 3. CRITICAL CHECK: Only navigate if the widget is still in the tree
+      // tabhi navigate kareha jab widget still cue ya tree me hai
       // and the await above completed without throwing an error.
       if (!mounted) return;
 
-      // SUCCESS: Redirect to Congrats Page
+      // SUCCESS: then congrats page pe redirect kar dega
       Navigator.of(context).pushReplacement(
         PremiumTransitions.zoomFade(
           CongratsPage(
@@ -73,7 +73,7 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
         _showErrorSnackBar(e.toString());
       }
     } finally {
-      // 4. Unlock the UI regardless of success or failure
+      // 4.sare ui ko unlock kar dega regardless of success or failure
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
@@ -147,11 +147,11 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
                   ),
                   const SizedBox(height: 50),
 
-                  // MODIFIED AUTHORIZATION BUTTON
+                  //  AUTHORIZATION BUTTON
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: AuraButton(
-                      // DISABLE button while submitting to stop premature triggers
+                      // button ko disable karna to avoaid multiple clicks
                       onPressed: _isSubmitting ? null : _handleGitHubAuth,
                       auraController: _bgController,
                       child: _isSubmitting

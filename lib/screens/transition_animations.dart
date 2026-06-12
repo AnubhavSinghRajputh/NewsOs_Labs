@@ -24,7 +24,7 @@ class PremiumTransitions {
     );
   }
 
-  /// 2. ZOOM & FADE
+  /// 2. YE ZOOM & FADE EFFECT KE LIYE
   static Route zoomFade(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -43,7 +43,7 @@ class PremiumTransitions {
     );
   }
 
-  /// 3. SLIDE UP (The "Panel" Entry)
+  /// 3. isse aap SLIDE UP (The "Panel" Entry) kar saktev hain
   /// Use this for: Settings, Profile, or special "Quant" Insight popups
   static Route slideUp(Widget page) {
     return PageRouteBuilder(
@@ -66,7 +66,7 @@ class PremiumTransitions {
     );
   }
 
-  /// 4. SOFT CROSS-FADE
+  /// 4. YE SOFT CROSS-FADE effect
   static Route softFade(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,

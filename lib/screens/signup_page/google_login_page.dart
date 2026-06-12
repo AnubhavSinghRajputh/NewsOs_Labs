@@ -19,7 +19,8 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
   late AnimationController _textController;
   late final GoogleAuthService _googleAuthService;
 
-  // Loading state to stop premature triggers and duplicate requests
+  // loading state hai jo ki premature triggers ko stop karta hai
+
   bool _isSubmitting = false;
 
   @override
@@ -64,7 +65,7 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
       // 3. SAFETY CHECK: Ensure the user is still on this page after the await.
       if (!mounted) return;
 
-      // 4. SUCCESS: ONLY now do we navigate to the CongratsPage.
+      // 4. SUCCESS: tab  sirf congrats peage  pe navigate karega
       // pushReplacement ensures they can't go back to this login screen.
       Navigator.of(context).pushReplacement(
         PremiumTransitions.zoomFade(

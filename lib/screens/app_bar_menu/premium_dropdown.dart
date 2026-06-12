@@ -41,6 +41,8 @@ class _PremiumDropdownState extends State<PremiumDropdown> {
     return OverlayEntry(
       builder: (context) => Stack(
         children: [
+          // --- GLOBAL BACKGROUND BLUR ---
+          // Blurs the rest of the website when the menu is open
           Positioned.fill(
             child: GestureDetector(
               onTap: _closeMenu,
@@ -52,6 +54,7 @@ class _PremiumDropdownState extends State<PremiumDropdown> {
               ),
             ),
           ),
+          // --- 3D FLOATING MENU ---
           CompositedTransformFollower(
             link: _layerLink,
             showWhenUnlinked: false,
@@ -73,6 +76,7 @@ class _PremiumDropdownState extends State<PremiumDropdown> {
       child: GestureDetector(
         onTap: _toggleMenu,
         child: Container(
+          // White Rectangular Capsule Styling
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -97,6 +101,7 @@ class _PremiumDropdownState extends State<PremiumDropdown> {
                 ),
               ),
               const SizedBox(width: 6),
+              // Arrow that rotates 180 degrees smoothly
               AnimatedRotation(
                 turns: _isOpen ? 0.5 : 0.0,
                 duration: const Duration(milliseconds: 300),
@@ -115,6 +120,7 @@ class _PremiumDropdownState extends State<PremiumDropdown> {
   }
 }
 
+// DATA MODELS
 class DropdownColumn {
   final String title;
   final List<DropdownItem> items;
@@ -167,12 +173,11 @@ class _DropdownContentState extends State<_DropdownContent> with SingleTickerPro
           color: Colors.transparent,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            // --- FIXED: Wrap the Container in IntrinsicWidth ---
+            // --- FIXED: IntrinsicWidth wraps the blur and container to size it exactly to content ---
             child: IntrinsicWidth(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
-                  // width property removed because IntrinsicWidth handles it now
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A1A1F).withOpacity(0.8),
@@ -184,7 +189,7 @@ class _DropdownContentState extends State<_DropdownContent> with SingleTickerPro
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: widget.columns.map((col) {
                       return SizedBox(
-                        width: 180, // Give each column a base width to prevent "Expanded" errors
+                        width: 180, // Base width for professional column spacing
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Column(
@@ -218,10 +223,13 @@ class _DropdownContentState extends State<_DropdownContent> with SingleTickerPro
 
   Widget _buildItem(DropdownItem item) {
     return InkWell(
-      onTap: () { item.onTap(); widget.onItemTapped(); },
+      onTap: () {
+        item.onTap();
+        widget.onItemTapped();
+      },
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
