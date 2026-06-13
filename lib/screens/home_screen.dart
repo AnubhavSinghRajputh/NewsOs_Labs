@@ -70,9 +70,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 800;
-    double headlineSize = isMobile ? 32 : 56;
+    double headlineSize = isMobile ? 40 : 72;
     double subHeadlineSize = isMobile ? 14 : 18;
-    double sectionTitleSize = isMobile ? 32 : 56;
+    double sectionTitleSize = isMobile ? 40 : 72;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -157,8 +157,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   child: AuraButton(
                                     onPressed: _goToLoginPage,
                                     auraController: _bgController,
-                                    width: 200,
-                                    height: 48,
+                                    width: 150,
+                                    height: 40,
                                     child: _buildButtonContent('sign in', Icons.arrow_forward),
                                   ),
                                 ),
@@ -167,8 +167,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     onPressed: _goToSignupPage,
                                     outlined: true,
                                     auraController: _bgController,
-                                    width: 200,
-                                    height: 48,
+                                    width: 150,
+                                    height: 40,
                                     child: _buildButtonContent('create', Icons.person_add_outlined),
                                   ),
                                 ),
@@ -177,8 +177,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     onPressed: _goToFAQPage,
                                     outlined: true,
                                     auraController: _bgController,
-                                    width: 200,
-                                    height: 48,
+                                    width: 150,
+                                    height: 40,
                                     child: _buildButtonContent('F.A.Q.s', Icons.help_outline_rounded),
                                   ),
                                 ),
@@ -257,20 +257,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: AuraButton(
                                   onPressed: _goToGitHubPage,
                                   auraController: _bgController,
-                                  width: 200,
-                                  height: 48,
+                                  width: 150,
+                                  height: 40,
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.orange,
                                       foregroundColor: Colors.black,
                                       elevation: 0,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.code, size: 22, color: Colors.black),
+                                      const Icon(Icons.code, size: 18, color: Colors.black),
                                       const SizedBox(width: 8),
-                                      const Text('GitHub', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20))
+                                      const Text('GitHub', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15))
                                     ],
                                   ),
                                 ),
@@ -280,19 +280,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   onPressed: _goToGoogleLoginPage,
                                   outlined: true,
                                   auraController: _bgController,
-                                  width: 200,
-                                  height: 48,
+                                  width: 150,
+                                  height: 40,
                                   style: OutlinedButton.styleFrom(
                                       foregroundColor: Colors.grey[300],
                                       side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.g_mobiledata, size: 24, color: Colors.white),
+                                      const Icon(Icons.g_mobiledata, size: 20, color: Colors.white),
                                       const SizedBox(width: 8),
-                                      const Text('Google', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20))
+                                      const Text('Google', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15))
                                     ],
                                   ),
                                 ),
@@ -332,13 +332,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Text(
           text,
           style: const TextStyle(
-              fontSize: 20,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.0
           ),
         ),
         const SizedBox(width: 8),
-        Icon(icon, size: 18),
+        Icon(icon, size: 16),
       ],
     );
   }
