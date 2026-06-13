@@ -725,7 +725,7 @@ class _QMLogoPainter extends CustomPainter {
     for (int i = 0; i < 6; i++) {
       final angle = i * math.pi / 3 - math.pi / 6;
       final innerR = r * 0.22;
-      final outerR = r * 0.65;
+      final outerR = r * 0.65;//
       canvas.drawLine(
         Offset(cx + innerR * math.cos(angle), cy + innerR * math.sin(angle)),
         Offset(cx + outerR * math.cos(angle), cy + outerR * math.sin(angle)),
