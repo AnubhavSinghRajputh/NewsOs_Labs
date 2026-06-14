@@ -15,6 +15,7 @@ class PremiumTransitions {
             begin: const Offset(1.0, 0.0),
             end: Offset.zero,
           ).animate(curve),
+
           child: FadeTransition(
             opacity: animation,
             child: child,

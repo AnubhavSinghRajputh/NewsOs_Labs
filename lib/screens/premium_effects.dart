@@ -3,7 +3,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
-/// DATA MODEL FOR BACKGROUND PARTICLES
+/// YE BACKGROUND PARTICLES KA DATA MODEL HAI
 class MovingDot {
   final double normalizedX;
   final double normalizedY;
@@ -168,7 +168,7 @@ class InteractiveFluidPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final angle = animationValue * 2 * math.pi;
 
-    // COLOR PALETTE: White -> Black -> Grey -> Greyish White -> Faint White
+    //  White -> Black -> Grey -> Greyish White -> Faint White
     final List<Color> colorCycle = [
       Colors.white,
       Colors.black,
@@ -177,12 +177,11 @@ class InteractiveFluidPainter extends CustomPainter {
       const Color(0xFFF5F5F5), // Faint White
     ];
 
-    // Determine current color index based on animation loop
+    //
     int colorIdx = (animationValue * colorCycle.length).floor() % colorCycle.length;
     Color currentColor = colorCycle[colorIdx];
 
-    // BLOB 1: THE TRACKER
-    // Pattern: Follows mouse with a slight organic "lag" sway
+    //
     final trackX = mousePosition.dx + math.sin(angle) * 20;
     final trackY = mousePosition.dy + math.cos(angle) * 20;
 
@@ -192,8 +191,7 @@ class InteractiveFluidPainter extends CustomPainter {
     ).createShader(Rect.fromCircle(center: Offset(trackX, trackY), radius: size.width * 0.3));
     canvas.drawCircle(Offset(trackX, trackY), size.width * 0.3, paint1);
 
-    // BLOB 2: THE HARMONIC PATTERN
-    // Pattern: Moves in a figure-eight (Lissajous) around the mouse
+    //
     final patternX = mousePosition.dx + math.sin(angle) * 150;
     final patternY = mousePosition.dy + math.sin(angle * 2) * 80;
 
@@ -203,8 +201,8 @@ class InteractiveFluidPainter extends CustomPainter {
     ).createShader(Rect.fromCircle(center: Offset(patternX, patternY), radius: size.width * 0.25));
     canvas.drawCircle(Offset(patternX, patternY), size.width * 0.25, paint2);
 
-    // BLOB 3: THE FLOATER
-    // Pattern: Drifts in a slow, circular pattern across the screen
+    //  THE FLOATER
+    // Pattern is  Drifts in a slow, circular pattern across the screen
     final floatX = (size.width / 2) + math.cos(angle * 0.4) * (size.width * 0.35);
     final floatY = (size.height / 2) + math.sin(angle * 0.4) * (size.height * 0.35);
 
@@ -328,7 +326,7 @@ class _TypingTextAnimationState extends State<TypingTextAnimation> with SingleTi
   @override
   void initState() {
     super.initState();
-    // MODIFIED: Increased speed by reducing Interval end from 0.9 to 0.4
+
     _characterCount = StepTween(begin: 0, end: widget.fullText.length).animate(
       CurvedAnimation(
         parent: widget.controller,
