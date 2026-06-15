@@ -40,23 +40,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   late AnimationController _descriptionController;
 
-  // ── Features section fade-in ──
+  // Features section fade-in
   late AnimationController _featuresController;
   late Animation<double>   _featuresFadeAnimation;
 
-  // ── NEW: Overlays panel reveal controller ──
+  // Overlays panel reveal
   late AnimationController _overlaysPanelController;
   late Animation<double>   _overlaysPanelFade;
 
-  final ScrollController      _scrollController      = ScrollController();
-  final TextEditingController _accessCodeController  = TextEditingController();
-  final GlobalKey             _overlaysPanelKey      = GlobalKey(); // ← for scroll trigger
+  final ScrollController      _scrollController     = ScrollController();
+  final TextEditingController _accessCodeController = TextEditingController();
 
-  bool _earlyAccessAnimated  = false;
-  bool _computingAnimated    = false;
-  bool _descriptionAnimated  = false;
-  bool _featuresAnimated     = false;
-  bool _overlaysPanelAnimated = false;  // ← NEW
+  bool _earlyAccessAnimated   = false;
+  bool _computingAnimated     = false;
+  bool _descriptionAnimated   = false;
+  bool _featuresAnimated      = false;
+  bool _overlaysPanelAnimated = false;
 
   @override
   void initState() {
@@ -107,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       curve: Curves.easeOut,
     );
 
-    // ── NEW: Overlays panel controller ──
     _overlaysPanelController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -142,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       setState(() => _earlyAccessAnimated = true);
       _earlyAccessController.forward();
     }
-    // ── Overlays panel appears just before FeaturesOverlay ──
+    // Overlays panel appears just before FeaturesOverlay
     if (offset > 1400 && !_overlaysPanelAnimated) {
       setState(() => _overlaysPanelAnimated = true);
       _overlaysPanelController.forward();
@@ -172,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _betaTextController.dispose();
     _descriptionController.dispose();
     _featuresController.dispose();
-    _overlaysPanelController.dispose();  // ← NEW
+    _overlaysPanelController.dispose();
     _scrollController.dispose();
     _accessCodeController.dispose();
     super.dispose();
@@ -186,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _goToGitHubPage()      => Navigator.of(context).push(PremiumTransitions.slideRight(const GitHubRegisPage()));
   void _goToFAQPage()         => Navigator.of(context).push(PremiumTransitions.slideRight(const FrequentlyAskedScreen()));
 
-  // ── Overlay panel (modal sheet — unchanged) ──────────────────────────────
+  // ── Overlay panel (modal sheet) ──────────────────────────────────────────
 
   void _showOverlayPanel() {
     showModalBottomSheet(
@@ -476,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-                  // ── OVERLAYS PANEL (PARTITION — DARK → WHITE → DARK) ────
+                  // ── OVERLAYS PANEL (white partition) ─────────────────────
                   FadeTransition(
                     opacity: _overlaysPanelFade,
                     child: SlideTransition(
@@ -488,10 +486,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-                  // ── FEATURES OVERLAY (returns to DARK background) ───────
+                  // ── FEATURES OVERLAY (with bgController passed) ───────────
                   FadeTransition(
                     opacity: _featuresFadeAnimation,
-                    child: const FeaturesOverlay(),
+                    child: FeaturesOverlay(
+                      bgController: _bgController,
+                    ),
                   ),
 
                   // ── FOOTER ────────────────────────────────────────────────
