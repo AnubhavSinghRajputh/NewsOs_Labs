@@ -50,10 +50,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double>   _overlaysPanelFade;
   late Animation<Offset>   _overlaysPanelSlide;
 
-  // NEW: Overlays Extended reveal (for the white background panel)
-  late AnimationController _overlaysExtendedController;
-  late Animation<double>   _overlaysExtendedFade;
-  late Animation<Offset>   _overlaysExtendedSlide;
+  // REMOVED: Overlays Extended now self-animates
 
   final ScrollController      _scrollController     = ScrollController();
   final TextEditingController _accessCodeController = TextEditingController();
@@ -63,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _descriptionAnimated        = false;
   bool _featuresAnimated           = false;
   bool _overlaysPanelAnimated      = false;
-  bool _overlaysExtendedAnimated   = false; // NEW
+  // REMOVED: _overlaysExtendedAnimated (widget handles it)
 
   @override
   void initState() {
@@ -130,22 +127,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       curve: Curves.easeOutCubic,
     ));
 
-    // NEW: Overlays Extended Animation Controller
-    _overlaysExtendedController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    );
-    _overlaysExtendedFade = CurvedAnimation(
-      parent: _overlaysExtendedController,
-      curve: Curves.easeOut,
-    );
-    _overlaysExtendedSlide = Tween<Offset>(
-      begin: const Offset(0, 0.05),
-      end:   Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _overlaysExtendedController,
-      curve: Curves.easeOutCubic,
-    ));
+    // REMOVED: _overlaysExtendedController (now self-managed)
 
     _scrollController.addListener(_onScroll);
 
@@ -172,16 +154,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       setState(() => _earlyAccessAnimated = true);
       _earlyAccessController.forward();
     }
-    // Overlays panel appears just before Overlays Extended
+    // Overlays panel trigger
     if (offset > 1400 && !_overlaysPanelAnimated) {
       setState(() => _overlaysPanelAnimated = true);
       _overlaysPanelController.forward();
     }
-    // NEW: Overlays Extended (white background panel) triggers
-    if (offset > 1900 && !_overlaysExtendedAnimated) {
-      setState(() => _overlaysExtendedAnimated = true);
-      _overlaysExtendedController.forward();
-    }
+    // REMOVED: Overlays Extended trigger (now self-animates on scroll)
     if (offset > 2400 && !_featuresAnimated) {
       setState(() => _featuresAnimated = true);
       _featuresController.forward();
@@ -208,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _descriptionController.dispose();
     _featuresController.dispose();
     _overlaysPanelController.dispose();
-    _overlaysExtendedController.dispose(); // NEW
+    // REMOVED: _overlaysExtendedController.dispose()
     _scrollController.dispose();
     _accessCodeController.dispose();
     super.dispose();
@@ -521,14 +499,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-                  // ── NEW: OVERLAYS EXTENDED (white bg with DesktopAnimation) ──
-                  FadeTransition(
-                    opacity: _overlaysExtendedFade,
-                    child: SlideTransition(
-                      position: _overlaysExtendedSlide,
-                      child: const _OverlaysExtendedSection(),
-                    ),
-                  ),
+                  // ── OVERLAYS EXTENDED (compact, self-animating) ───────────
+                  // No more external FadeTransition/SlideTransition wrapping!
+                  // The widget now handles its own scroll-triggered animation.
+                  const _OverlaysExtendedSection(),
 
                   // ── FEATURES OVERLAY (with bgController passed) ───────────
                   FadeTransition(
@@ -733,7 +707,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-// ─── NEW: Overlays Extended Section Widget ───────────────────────────────────
+// ─── Overlays Extended Section Widget (Compact, Self-Animating) ──────────────
 
 class _OverlaysExtendedSection extends StatelessWidget {
   const _OverlaysExtendedSection();
@@ -742,7 +716,7 @@ class _OverlaysExtendedSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      margin: const EdgeInsets.symmetric(vertical: 30, horizontal: 20), // ← reduced margin
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1300),
@@ -753,44 +727,9 @@ class _OverlaysExtendedSection extends StatelessWidget {
             'Manage all your messages with AI-powered intelligence. '
                 'Available across desktop, mobile, and web platforms with seamless synchronization.',
             maxWidth: 1300,
-            features: [
-              OverlayFeature(
-                title: 'Desktop Application',
-                description:
-                'Native desktop experience with system-level integrations and shortcuts',
-                icon: Icons.desktop_windows,
-              ),
-              OverlayFeature(
-                title: 'AI-Powered Sorting',
-                description:
-                'Automatically categorize and prioritize messages using advanced AI',
-                icon: Icons.auto_awesome,
-              ),
-              OverlayFeature(
-                title: 'Cross-Platform Sync',
-                description:
-                'Your messages and settings stay synchronized across all devices',
-                icon: Icons.sync,
-              ),
-              OverlayFeature(
-                title: 'Smart Notifications',
-                description:
-                'Get notified only for what matters most with intelligent filtering',
-                icon: Icons.notifications_active,
-              ),
-              OverlayFeature(
-                title: 'Message Categories',
-                description:
-                'Organized into Chats, Unread, Status, and Channels automatically',
-                icon: Icons.category,
-              ),
-              OverlayFeature(
-                title: 'End-to-End Encryption',
-                description:
-                'Your conversations are secure with military-grade encryption',
-                icon: Icons.lock_outline,
-              ),
-            ],
+            // ❌ No features parameter — removed
+            // ✅ Animation is automatic via widget's internal controller
+            // ✅ Compact size is the default
           ),
         ),
       ),

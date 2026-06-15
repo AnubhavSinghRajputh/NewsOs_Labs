@@ -7,7 +7,7 @@ class FAQItem {
   const FAQItem({required this.question, required this.answer});
 }
 
-/// subtle animation when fade is pressed and slide animation
+
 class FrequentlyAskedScreen extends StatefulWidget {
   const FrequentlyAskedScreen({Key? key}) : super(key: key);
 
