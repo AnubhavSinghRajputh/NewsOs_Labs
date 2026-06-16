@@ -1,4 +1,4 @@
-// lib/screens/overlays/overlays_panel.dart
+// lib/screens/overlays/overlays_pannel.dart
 //
 // WHITE-background overlay panel.
 // Superimposed on home_screen via a SliverPersistentHeader so it scrolls
@@ -7,6 +7,34 @@
 
 import 'package:flutter/material.dart';
 import '../animations/pendulum_animation.dart';
+import '../transition_animations.dart';
+
+// Re-export so call-sites only need to import this file.
+typedef PremiumTransitionType = OverlayRouteType; // see below
+
+/// Re-declared here so this file is self-contained. Matches the
+/// enum inside [PremiumTransitions] 1-to-1.
+enum OverlayRouteType {
+  slideRight,
+  zoomFade,
+  slideUp,
+  softFade,
+}
+
+extension _PremiumRoute on OverlayRouteType {
+  Route<dynamic> _toRoute(Widget child) {
+    switch (this) {
+      case OverlayRouteType.slideRight:
+        return PremiumTransitions.slideRight(child);
+      case OverlayRouteType.zoomFade:
+        return PremiumTransitions.zoomFade(child);
+      case OverlayRouteType.slideUp:
+        return PremiumTransitions.slideUp(child);
+      case OverlayRouteType.softFade:
+        return PremiumTransitions.softFade(child);
+    }
+  }
+}
 
 // ─── Feature model ────────────────────────────────────────────────────────────
 
@@ -32,13 +60,55 @@ const _features = <_Feature>[
 ];
 
 // ─── Main widget ──────────────────────────────────────────────────────────────
-//
-// Drop this directly inside home_screen's Column (after all dark content)
-// so it scrolls in as a natural continuation.  The top lined partition and
-// white background create the visual "attachment" effect.
 
 class OverlaysPanel extends StatefulWidget {
-  const OverlaysPanel({Key? key}) : super(key: key);
+  /// Which [PremiumTransitions] animation drives this panel:
+  ///  • as a route (see [OverlaysPanel.push])
+  ///  • as an internal content-swap transition (see [animateContentSwap])
+  final OverlayRouteType transitionType;
+
+  /// Wraps the body in an [AnimatedSwitcher] using the chosen transition.
+  /// Set false for static, no-flicker rebuilds.
+  final bool animateContentSwap;
+
+  /// Change this to trigger a body swap (any object that's != previous).
+  /// Examples: [ValueKey], [ObjectKey], [UniqueKey].
+  final Key? contentKey;
+
+  /// Optional `onTap` for the "See developer docs" button. If null, the
+  /// button is rendered but does nothing (matching original behavior).
+  final VoidCallback? onDocsTap;
+
+  const OverlaysPanel({
+    Key? key,
+    this.transitionType   = OverlayRouteType.slideUp,
+    this.animateContentSwap = true,
+    this.contentKey,
+    this.onDocsTap,
+  }) : super(key: key);
+
+  /// Pushes [panel] as a full-screen route using the matching
+  /// [PremiumTransitions] animation. If [transition] is omitted,
+  /// [panel.transitionType] is used.
+  ///
+  /// Example:
+  /// ```dart
+  /// OverlaysPanel.push(
+  ///   context: context,
+  ///   panel: const OverlaysPanel(
+  ///     transitionType: OverlayRouteType.zoomFade,
+  ///   ),
+  /// );
+  /// ```
+  static Future<T?> push<T>({
+    required BuildContext context,
+    required OverlaysPanel panel,
+    OverlayRouteType? transition,
+  }) {
+    final type = transition ?? panel.transitionType;
+    final route = type._toRoute(panel) as Route<T>;
+    return Navigator.of(context).push<T>(route);
+  }
 
   @override
   State<OverlaysPanel> createState() => _OverlaysPanelState();
@@ -46,8 +116,6 @@ class OverlaysPanel extends StatefulWidget {
 
 class _OverlaysPanelState extends State<OverlaysPanel>
     with SingleTickerProviderStateMixin {
-  // All rows revealed with staggered delays as soon as panel mounts
-
   // Hero entry animation
   late final AnimationController _heroCtrl;
   late final Animation<double>   _heroFade;
@@ -89,30 +157,102 @@ class _OverlaysPanelState extends State<OverlaysPanel>
     final screenW  = MediaQuery.of(context).size.width;
     final isMobile = screenW < 700;
 
-    return Container(
-      // White background — contrasts with the dark home screen above it
-      color: const Color(0xFFF7F7F5),
-      child: Column(
-        children: [
-          // ── Lined partition (dark → white transition bar) ────────────────
-          _buildPartition(),
-
-          // ── Hero ─────────────────────────────────────────────────────────
-          FadeTransition(
-            opacity: _heroFade,
-            child: SlideTransition(
-              position: _heroSlide,
-              child: _buildHero(isMobile),
-            ),
+    // The "body" we want to animate if [animateContentSwap] is on.
+    final body = Column(
+      children: [
+        _buildPartition(),
+        FadeTransition(
+          opacity: _heroFade,
+          child: SlideTransition(
+            position: _heroSlide,
+            child: _buildHero(isMobile),
           ),
-
-          // ── Feature grid ─────────────────────────────────────────────────
-          _buildFeaturesGrid(isMobile),
-
-          const SizedBox(height: 100),
-        ],
-      ),
+        ),
+        _buildFeaturesGrid(isMobile),
+        const SizedBox(height: 100),
+      ],
     );
+
+    return Container(
+      color: const Color(0xFFF7F7F5),
+      child: widget.animateContentSwap
+          ? AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        switchInCurve:  Curves.easeOutCubic,
+        switchOutCurve: Curves.easeOutCubic,
+        layoutBuilder: _buildSwitcherLayout,
+        transitionBuilder: _buildSwitcherTransition,
+        child: KeyedSubtree(
+          key: widget.contentKey ?? const ValueKey('overlays_panel_default'),
+          child: body,
+        ),
+      )
+          : body,
+    );
+  }
+
+  // ── AnimatedSwitcher plumbing ─────────────────────────────────────────────
+
+  Widget _buildSwitcherLayout(
+      Widget? currentChild,
+      List<Widget> previousChildren,
+      ) {
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: <Widget>[
+        ...previousChildren,
+        if (currentChild != null) currentChild,
+      ],
+    );
+  }
+
+  Widget _buildSwitcherTransition(
+      Widget child,
+      Animation<double> animation,
+      ) {
+    switch (widget.transitionType) {
+      case OverlayRouteType.slideRight:
+        final curve = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutQuint,
+        );
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(curve),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+
+      case OverlayRouteType.zoomFade:
+        final curve = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+        );
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.85, end: 1.0).animate(curve),
+            child: child,
+          ),
+        );
+
+      case OverlayRouteType.slideUp:
+        final curve = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.0, 1.0),
+            end: Offset.zero,
+          ).animate(curve),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+
+      case OverlayRouteType.softFade:
+        return FadeTransition(opacity: animation, child: child);
+    }
   }
 
   // ── Partition ─────────────────────────────────────────────────────────────
@@ -122,13 +262,10 @@ class _OverlaysPanelState extends State<OverlaysPanel>
   Widget _buildPartition() {
     return Column(
       children: [
-        // Hairline top
         Container(height: 1, color: const Color(0xFF1A1A1A).withOpacity(0.08)),
         const SizedBox(height: 2),
-        // Bold centre line
         Container(height: 2, color: const Color(0xFF1A1A1A).withOpacity(0.18)),
         const SizedBox(height: 2),
-        // Hairline bottom
         Container(height: 1, color: const Color(0xFF1A1A1A).withOpacity(0.08)),
       ],
     );
@@ -144,11 +281,8 @@ class _OverlaysPanelState extends State<OverlaysPanel>
       ),
       child: Column(
         children: [
-          // Pendulum icon — dark coloured for white background
           const PendulumAnimation(size: 80, color: Color(0xFF1A1A1A)),
-
           const SizedBox(height: 36),
-
           Text(
             ' < One Platform For Everything >',
             textAlign: TextAlign.center,
@@ -161,10 +295,8 @@ class _OverlaysPanelState extends State<OverlaysPanel>
               letterSpacing: -1.0,
             ),
           ),
-
           const SizedBox(height: 32),
-
-          _DocsButton(),
+          _DocsButton(onTap: widget.onDocsTap),
         ],
       ),
     );
@@ -186,7 +318,6 @@ class _OverlaysPanelState extends State<OverlaysPanel>
       child: Column(
         children: List.generate(rows.length, (rowIdx) {
           return _AnimatedRow(
-            // All rows reveal with staggered delays once panel mounts
             revealed: true,
             delay:    Duration(milliseconds: 120 + rowIdx * 80),
             child: Column(
@@ -203,14 +334,18 @@ class _OverlaysPanelState extends State<OverlaysPanel>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _FeatureCard(feature: rows[rowIdx][0])),
+                      Expanded(
+                        child: _FeatureCard(feature: rows[rowIdx][0]),
+                      ),
                       if (rows[rowIdx].length > 1) ...[
-                        // Vertical column divider
                         Container(
                           width: 1,
-                          color: const Color(0xFF1A1A1A).withOpacity(0.08),
+                          color: const Color(0xFF1A1A1A)
+                              .withOpacity(0.08),
                         ),
-                        Expanded(child: _FeatureCard(feature: rows[rowIdx][1])),
+                        Expanded(
+                          child: _FeatureCard(feature: rows[rowIdx][1]),
+                        ),
                       ],
                     ],
                   ),
@@ -313,7 +448,6 @@ class _FeatureCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Dark filled circle with white checkmark
           Container(
             width:  26,
             height: 26,
@@ -324,7 +458,6 @@ class _FeatureCard extends StatelessWidget {
             ),
             child: const Icon(Icons.check, color: Colors.white, size: 14),
           ),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,7 +497,8 @@ class _FeatureCard extends StatelessWidget {
 // ─── "See developer docs" button ─────────────────────────────────────────────
 
 class _DocsButton extends StatefulWidget {
-  const _DocsButton();
+  final VoidCallback? onTap;
+  const _DocsButton({this.onTap});
   @override
   State<_DocsButton> createState() => _DocsButtonState();
 }
@@ -392,10 +526,12 @@ class _DocsButtonState extends State<_DocsButton> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(50),
-            onTap: () {},
+            onTap: widget.onTap ?? () {},
             splashColor: Colors.black.withOpacity(0.06),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 13),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 26, vertical: 13,
+              ),
               child: AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
                 style: TextStyle(

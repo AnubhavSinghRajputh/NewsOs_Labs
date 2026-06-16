@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../animations/animation_widget/desktop_animation.dart';
 import '../transition_animations.dart';
+import '../buttons/moving_icons_button.dart';
 
 /// Selects which [PremiumTransitions] animation drives the overlay
 /// when pushed as a route, and how it transitions internally when
@@ -42,10 +43,23 @@ class OverlaysExtended extends StatefulWidget {
   final double maxDesktopHeight;
   final double compactScale;
 
-  // ── NEW: Transition configuration ─────────────────────────────────────────
+  // ── Transition configuration ─────────────────────────────────────────
   final OverlayTransitionType transitionType;
   final bool animateContentSwap;
   final Key? contentKey; // change to trigger internal AnimatedSwitcher
+
+  // ── NEW: Moving icons (segmented control) configuration ───────────────────
+  /// Whether to show the [MovingIconsButton] segmented control in the header.
+  final bool showSegmentedControl;
+
+  /// Labels for the segmented control. Defaults to Desktop / Terminal / Web & iOS.
+  final List<String> segmentLabels;
+
+  /// Index initially selected in the segmented control.
+  final int segmentInitialIndex;
+
+  /// Called with (index, label) whenever the segmented control selection changes.
+  final void Function(int index, String label)? onSegmentChanged;
 
   const OverlaysExtended({
     super.key,
@@ -76,6 +90,11 @@ class OverlaysExtended extends StatefulWidget {
     this.transitionType      = OverlayTransitionType.slideUp,
     this.animateContentSwap  = true,
     this.contentKey,
+    // Segmented control defaults
+    this.showSegmentedControl = true,
+    this.segmentLabels = const ['Desktop', 'Terminal', 'Web & iOS'],
+    this.segmentInitialIndex = 0,
+    this.onSegmentChanged,
   });
 
   /// Pushes [overlay] as a full-screen route using the matching
@@ -134,10 +153,13 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
   bool _hasAnimated      = false;
   bool _isListening      = false;
   bool _useExternalCtrl  = false;
+  late int _segmentIndex;
 
   @override
   void initState() {
     super.initState();
+
+    _segmentIndex = widget.segmentInitialIndex;
 
     _useExternalCtrl = widget.controller != null;
     _controller = widget.controller ??
@@ -180,6 +202,12 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
     if (status == AnimationStatus.completed) {
       widget.onAnimated?.call();
     }
+  }
+
+  void _handleSegmentChanged(int index, String label) {
+    if (index == _segmentIndex) return;
+    setState(() => _segmentIndex = index);
+    widget.onSegmentChanged?.call(index, label);
   }
 
   void _attachScrollListener() {
@@ -324,7 +352,8 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
               children: [
                 if (widget.title != null ||
                     widget.subtitle != null ||
-                    widget.description != null)
+                    widget.description != null ||
+                    widget.showSegmentedControl)
                   _buildHeader(),
 
                 _buildAnimatedBody(),
@@ -359,7 +388,7 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
       layoutBuilder: _buildSwitcherLayout,
       transitionBuilder: _buildSwitcherTransition,
       child: KeyedSubtree(
-        key: widget.contentKey ?? const ValueKey('overlay_body_default'),
+        key: widget.contentKey ?? ValueKey('overlay_body_segment_$_segmentIndex'),
         child: body,
       ),
     );
@@ -495,6 +524,18 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
                 height: 1.4,
                 fontWeight: FontWeight.w400,
               ),
+            ),
+          ],
+          if (widget.showSegmentedControl) ...[
+            const SizedBox(height: 16),
+            MovingIconsButton(
+              labels: widget.segmentLabels,
+              initialIndex: _segmentIndex,
+              onChanged: _handleSegmentChanged,
+              backgroundColor: const Color(0xFFF2F2F4),
+              sliderColor: Colors.white,
+              selectedTextColor: const Color(0xFF0A0A0A),
+              unselectedTextColor: Colors.black.withOpacity(0.45),
             ),
           ],
         ],
