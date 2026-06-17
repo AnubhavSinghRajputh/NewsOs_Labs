@@ -97,14 +97,14 @@ class _ComputingAnimationState extends State<ComputingAnimation>
           ),
         ],
       ),
-      // ye center aligner hai : Use Center to push the Column to the exact middle of the container
+
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // Center vertically
           crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
           children: [
 
-            // Wrapped in a Row to ensure it doesn't stretch
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -166,12 +166,12 @@ class _ComputingAnimationState extends State<ComputingAnimation>
                     letterSpacing: -2.0,
                   ),
                 ),
-                // Using a Stack with a fixed width to prevent shaking
+
 
                 SizedBox(
-                  width: 300, // Reserved space for the longest word "employees"
+                  width: 300,
                   child: Stack(
-                    alignment: Alignment.centerLeft, // Anchor text to the left of the box
+                    alignment: Alignment.centerLeft,
                     children: [
                       Text(
                         _currentWord,

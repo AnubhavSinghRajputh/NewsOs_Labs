@@ -22,12 +22,11 @@ class FeaturesWebAnimation extends StatefulWidget {
 
 class _FeaturesWebAnimationState extends State<FeaturesWebAnimation>
     with TickerProviderStateMixin {
-  // Drives orbital rotation of categories/sub-nodes.
+
   late AnimationController _rotationController;
-  // Drives the slow "breathing" camera zoom in/out, independent of rotation
-  // so the two motions don't feel mechanically locked together.
+
   late AnimationController _zoomController;
-  // Drives per-node twinkle/glow pulsing for a more alive, organic feel.
+
   late AnimationController _twinkleController;
 
   final List<String> categories = [
@@ -71,8 +70,7 @@ class _FeaturesWebAnimationState extends State<FeaturesWebAnimation>
       duration: widget.duration,
     )..repeat();
 
-    // Slower than the rotation, so the "camera" drifts in and out across
-    // multiple rotation cycles rather than syncing up with them.
+
     _zoomController = AnimationController(
       vsync: this,
       duration: Duration(
@@ -134,7 +132,7 @@ class _FeaturesPainter extends CustomPainter {
     this.useDarkTheme = false,
   });
 
-  /// Maps a raw value in [0,1] through an ease-in-out curve, used to make
+  /// raw value ki mapping karne ke liye in [0,1] through an ease-in-out curve, used to make
   /// the breathing zoom feel smooth rather than linear back-and-forth.
   double _easeInOut(double t) => 0.5 - 0.5 * math.cos(t * math.pi);
 
@@ -151,9 +149,6 @@ class _FeaturesPainter extends CustomPainter {
       );
     }
 
-    // Overall "camera" zoom: breathes between ~0.92x and ~1.08x scale,
-    // eased so it accelerates/decelerates smoothly like a real camera
-    // drifting rather than linearly oscillating.
     final double zoomScale = 0.92 + _easeInOut(zoom) * 0.16;
 
     canvas.save();
@@ -166,7 +161,6 @@ class _FeaturesPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
     );
 
-    // ---- Soft ambient background glow behind the whole web, to add depth ----
     final Paint ambientGlow = Paint()
       ..shader = RadialGradient(
         colors: [
@@ -178,7 +172,6 @@ class _FeaturesPainter extends CustomPainter {
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
     canvas.drawCircle(center, size.width * 0.55, ambientGlow);
 
-    // ---- Center node glow + label ----
     final double centerPulse = 0.85 + 0.15 * math.sin(twinkle * 2 * math.pi);
     final Paint centerGlowPaint = Paint()
       ..color = Colors.greenAccent.withOpacity(0.35 * centerPulse)
@@ -211,23 +204,18 @@ class _FeaturesPainter extends CustomPainter {
 
     final double radius = size.width * 0.3;
 
-    // Collect category nodes first so we can sort by simulated depth and
-    // paint back-to-front, like a real 3D scene (far things behind near ones).
+
     final List<_NodeRenderData> categoryNodes = [];
 
     for (int i = 0; i < categories.length; i++) {
       final double angle =
           (i / categories.length) * 2 * math.pi + progress * 2 * math.pi;
 
-      // Simulated depth: cos(angle) maps to roughly [-1, 1]. We treat +1 as
-      // "closest to camera" (bigger, brighter) and -1 as "furthest" (smaller,
-      // dimmer) — this is what actually sells a 3D/zoom illusion on a 2D canvas.
       final double depth = math.cos(angle);
       final double depthScale = 0.78 + ((depth + 1) / 2) * 0.5; // 0.78–1.28
       final double depthOpacity = 0.55 + ((depth + 1) / 2) * 0.45; // 0.55–1.0
 
-      // Vertical offset shrinks slightly with depth too, like an ellipse
-      // orbit viewed at a slight tilt rather than a flat circle.
+
       final Offset catPos = Offset(
         cx + radius * math.cos(angle),
         cy + radius * math.sin(angle) * 0.92,
@@ -307,9 +295,7 @@ class _FeaturesPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// Draws a gently curved (quadratic bezier) connection rather than a
-  /// straight line, plus a soft glow stroke beneath it, so the web reads
-  /// as organic strands rather than a rigid wireframe.
+
   void _drawCurvedConnection({
     required Canvas canvas,
     required Offset from,
@@ -333,7 +319,7 @@ class _FeaturesPainter extends CustomPainter {
         ? Colors.white.withOpacity(0.30 * opacity)
         : Colors.white.withOpacity(0.85 * opacity);
 
-    // Faint glow pass beneath the crisp line for a soft, lit-strand look.
+
     canvas.drawPath(
       path,
       Paint()
@@ -360,7 +346,7 @@ class _FeaturesPainter extends CustomPainter {
     final double pulse =
         0.8 + 0.2 * math.sin(twinkle * 2 * math.pi + node.phase * 1.7);
 
-    // Glow halo behind the node dot, scaled/faded by simulated depth.
+
     final Paint glowPaint = Paint()
       ..color = Colors.greenAccent.withOpacity(0.30 * node.depthOpacity * pulse)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 9 * node.depthScale);
